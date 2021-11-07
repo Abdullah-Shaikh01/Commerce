@@ -1,0 +1,55 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h1>{{ item.title }}</h1>
+    <button class="button-mid" su>Watchlist</button>
+    <br><br>
+    <div id="item-image-div">
+        <img src="{{ item.image_url }}" alt="{{item.title}}">
+    </div>
+    <br>
+    <div id="description">
+        <p>{{ item.description }}</p>
+    </div>
+    <br>
+    <h5>Owner: {{item.owner}} &emsp;&emsp;&emsp;Base Price: ${{item.base_price}}</h5>
+    <br>
+        <h5>highest bidder: {{highest_bid.user_id}} &emsp;&emsp;Price: ${{highest_bid.price}}</h5>
+        <p>{{bids.count }} bids so far.</p>
+    <form action="{% url 'bid' %}" method="POST">
+        {% csrf_token %}
+        {% if message %}
+        <div class="message"><strong>{{ message }}</strong></div>
+        {% endif %}
+        <input type="number" id="add-bid" placeholder="Bid" name="price">
+        <span>Please enter bid higher than current highest bid.</span>
+        <input type="hidden" name="listing" value="{{item.id}}">
+        <input type="hidden" name="curr_price" value="{{highest_bid.price}}">
+        <br>
+        <input type="submit" value="Place Bid" class="button-mid">
+    </form>
+    <br>
+    <h5>Details</h5>
+    <ul>
+        <li>Listed by: {{ item.owner }}</li>
+        <li>Category: {{ item.category }}</li>
+    </ul>
+    <h5>Comments</h5>
+    <ul>
+        {% for comment in comments %}
+            <li>
+                {{comment.user_id}}:<br>
+                <p>{{comment.comment}}</p>
+            </li>
+        {% empty %}
+        <h6>No comments yet!</h6>
+        {% endfor %}
+    </ul>
+    <form action="{% url 'comment' %}" method="post">
+        {% csrf_token %}
+        <input type="text" id="text-line" placeholder="Enter your comment here" name="comment">
+        <input type="hidden" name="listing_id" value="{{item.id}}">
+        <input type="submit" value="Submit" class="button-mid">
+    </form>
+    <br><br>
+{% endblock %}
