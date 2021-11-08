@@ -6,7 +6,7 @@ class User(AbstractUser):
     pass
 
 
-class Listings(models.Model):
+class Listing(models.Model):
     choice = [
         ('Fashion', 'Fashion'),
         ('Toy', 'Toy'),
@@ -20,15 +20,16 @@ class Listings(models.Model):
     base_price = models.FloatField()
     image_url = models.URLField(blank=True)
     category = models.CharField(max_length=30, choices=choice)
-    owner = models.CharField(max_length=64)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="item_owner")
     open = models.BooleanField(default=True)
+    watchlist = models.ManyToManyField(User, blank=True, related_name="watchlist")
 
     def __str__(self):
         return f"{self.id}: {self.title} for {self.base_price} $"
 
 
 class Bid(models.Model):
-    listing_id = models.ForeignKey(Listings, on_delete=models.CASCADE, related_name="bid")
+    listing_id = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name="bid")
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name="participated_bid")
     price = models.FloatField()
 
@@ -37,7 +38,7 @@ class Bid(models.Model):
 
 
 class Comment(models.Model):
-    listing_id = models.ForeignKey(Listings, on_delete=models.CASCADE, related_name="item_comment")
+    listing_id = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name="item_comment")
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     comment = models.TextField()
 

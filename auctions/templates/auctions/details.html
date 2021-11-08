@@ -2,7 +2,11 @@
 
 {% block body %}
     <h1>{{ item.title }}</h1>
-    <button class="button-mid" su>Watchlist</button>
+     <form action="{% url 'watchlist' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="listing" value="{{item.id}}">
+        <input type="submit" class="button-mid" value="Watchlist">
+    </form>
     <br><br>
     <div id="item-image-div">
         <img src="{{ item.image_url }}" alt="{{item.title}}">

@@ -7,12 +7,12 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django import forms
-from .models import User, Listings, Bid, Comment
+from .models import User, Listing, Bid, Comment
 
 
 def index(request):
     return render(request, "auctions/index.html", {
-        "items": Listings.objects.all()
+        "items": Listing.objects.all()
     })
 
 
@@ -70,7 +70,7 @@ def register(request):
 
 class ListingForm(forms.ModelForm):
     class Meta:
-        model = Listings
+        model = Listing
         fields = ['title', 'description', 'base_price', 'image_url', 'category']
 
     def __init__(self, *args, **kwargs):
@@ -81,12 +81,13 @@ class ListingForm(forms.ModelForm):
         self.fields['category'].widget.attrs['style'] = 'width:200px;'
 
 
+@login_required
 def listing(request):
     if request.method == "POST":
 
         # Take in the data the user submitted and save it as form
         form = ListingForm(request.POST)
-        owner = request.POST["user1"]
+        owner = User.objects.get(id=request.user.id)
         # Check if form data is valid (server-side)
         if form.is_valid():
             listing_item = form.save(commit=False)
@@ -96,7 +97,6 @@ def listing(request):
                 "item": listing_item
             })
         else:
-
             # If the form is invalid, re-render the page with existing information.
             return render(request, "auctions/create.html", {
                 "form": ListingForm()
@@ -107,7 +107,7 @@ def listing(request):
 
 
 def item(request, item_id, message=None):
-    item_details = Listings.objects.get(id=item_id)
+    item_details = Listing.objects.get(id=item_id)
     bids = item_details.bid.all()
     highest_bid = bids.last()
     if not highest_bid:
@@ -130,7 +130,7 @@ def bid(request):
         price = request.POST['price']
         thing_id = request.POST['listing']
         if price > curr_price:
-            auction = Listings.objects.get(id=thing_id)
+            auction = Listing.objects.get(id=thing_id)
             user = User.objects.get(id=request.user.id)
             curr_bid = Bid(listing_id=auction, user_id=user, price=price)
             curr_bid.save()
@@ -145,10 +145,19 @@ def bid(request):
 def comment(request):
     if request.method == "POST":
         item_id = request.POST['listing_id']
-        thing = Listings.objects.get(id=item_id)
+        thing = Listing.objects.get(id=item_id)
         user = User.objects.get(id=request.user.id)
         com = request.POST['comment']
         comm = Comment(listing_id=thing, user_id=user, comment=com)
         comm.save()
         return item(request, item_id)
 
+
+@login_required
+def watchlist(request):
+    if request.method == "POST":
+        user = User.objects.get(id=request.user.id)
+        item_id = request.POST['listing']
+        thing = Listing.objects.get(id=item_id)
+        thing.watchlist.add(user)
+        return item(request, item_id)
