@@ -12,7 +12,8 @@ from .models import User, Listing, Bid, Comment
 
 def index(request):
     return render(request, "auctions/index.html", {
-        "items": Listing.objects.all()
+        "items": Listing.objects.all(),
+        "watchlist": False
     })
 
 
@@ -158,7 +159,7 @@ def comment(request):
 
 
 @login_required
-def watchlist(request):
+def add_watchlist(request):
     if request.method == "POST":
         user = User.objects.get(id=request.user.id)
         item_id = request.POST['listing']
@@ -174,3 +175,11 @@ def rem_watchlist(request):
         thing = Listing.objects.get(id=item_id)
         thing.watchlist.remove(user)
         return item(request, item_id)
+
+
+def watchlist(request):
+    user = User.objects.get(id=request.user.id)
+    return render(request, "auctions/index.html", {
+        "items": user.watchlist.all(),
+        "watchlist": True
+    })

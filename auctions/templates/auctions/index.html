@@ -1,7 +1,11 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-    <h2>Active Listings:</h2>
+    {% if watchlist %}
+        <h2>Watchlisted items:</h2>
+    {% else %}
+        <h2>Active Listings:</h2>
+    {% endif %}
     {% for item in items %}
         <div class="items" onclick="location.href='{% url 'item_details' item.id %}';" style="cursor: pointer;">
             <div id="image">
