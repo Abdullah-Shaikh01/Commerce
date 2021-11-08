@@ -108,18 +108,22 @@ def listing(request):
 
 def item(request, item_id, message=None):
     item_details = Listing.objects.get(id=item_id)
+    user = User.objects.get(id=request.user.id)
     bids = item_details.bid.all()
     highest_bid = bids.last()
-    if not highest_bid:
-        user = User.objects.get(id=request.user.id)
-        highest_bid = Bid(listing_id=item_details, user_id=user, price=item_details.base_price)
     comments = item_details.item_comment.all()
+    watch_list = user.watchlist.all()
+    watchlisted = item_details in watch_list
+    if not highest_bid:
+        highest_bid = Bid(listing_id=item_details, user_id=user, price=item_details.base_price)
+
     return render(request, "auctions/details.html", {
         "item": item_details,
         "bids": bids,
         "comments": comments,
         "highest_bid": highest_bid,
-        "message": message
+        "message": message,
+        "watchlisted": watchlisted
     })
 
 
@@ -160,4 +164,13 @@ def watchlist(request):
         item_id = request.POST['listing']
         thing = Listing.objects.get(id=item_id)
         thing.watchlist.add(user)
+        return item(request, item_id)
+
+
+def rem_watchlist(request):
+    if request.method == "POST":
+        user = User.objects.get(id=request.user.id)
+        item_id = request.POST['listing']
+        thing = Listing.objects.get(id=item_id)
+        thing.watchlist.remove(user)
         return item(request, item_id)

@@ -2,11 +2,19 @@
 
 {% block body %}
     <h1>{{ item.title }}</h1>
-     <form action="{% url 'watchlist' %}" method="post">
-        {% csrf_token %}
-        <input type="hidden" name="listing" value="{{item.id}}">
-        <input type="submit" class="button-mid" value="Watchlist">
-    </form>
+    {% if watchlisted %}
+         <form action="{% url 'remove_watchlist' %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="listing" value="{{item.id}}">
+            <input type="submit" class="button-mid" value="Remove from Watchlist">
+        </form>
+    {% else %}
+        <form action="{% url 'add_watchlist' %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="listing" value="{{item.id}}">
+            <input type="submit" class="button-mid" value="Add to Watchlist">
+        </form>
+    {% endif %}
     <br><br>
     <div id="item-image-div">
         <img src="{{ item.image_url }}" alt="{{item.title}}">
