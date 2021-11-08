@@ -13,6 +13,9 @@ urlpatterns = [
     path("comment", views.comment, name="comment"),
     path("add_watchlist", views.add_watchlist, name="add_watchlist"),
     path("remove_watchlist", views.rem_watchlist, name="remove_watchlist"),
-    path("watchlist", views.watchlist, name="watchlist")
-
+    path("watchlist", views.watchlist, name="watchlist"),
+    path("close", views.close, name="close"),
+    path("closed_listings", views.closed, name="close_index"),
+    path("categories", views.categories, name="categories"),
+    path("category/<str:choice>", views.filter_category, name="filter_category")
 ]

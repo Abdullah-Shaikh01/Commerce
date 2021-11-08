@@ -12,7 +12,14 @@ from .models import User, Listing, Bid, Comment
 
 def index(request):
     return render(request, "auctions/index.html", {
-        "items": Listing.objects.all(),
+        "items": Listing.objects.filter(open=True),
+        "watchlist": False
+    })
+
+
+def closed(request):
+    return render(request, "auctions/index.html", {
+        "items": Listing.objects.filter(open=False),
         "watchlist": False
     })
 
@@ -107,11 +114,15 @@ def listing(request):
     })
 
 
+@login_required
 def item(request, item_id, message=None):
     item_details = Listing.objects.get(id=item_id)
     user = User.objects.get(id=request.user.id)
+    owner = item_details.owner == user
     bids = item_details.bid.all()
     highest_bid = bids.last()
+    if not item_details.open:
+        winner = user == highest_bid.user_id
     comments = item_details.item_comment.all()
     watch_list = user.watchlist.all()
     watchlisted = item_details in watch_list
@@ -124,7 +135,9 @@ def item(request, item_id, message=None):
         "comments": comments,
         "highest_bid": highest_bid,
         "message": message,
-        "watchlisted": watchlisted
+        "watchlisted": watchlisted,
+        "owner": owner,
+        "winner": winner
     })
 
 
@@ -141,9 +154,7 @@ def bid(request):
             curr_bid.save()
             return item(request, thing_id)
         else:
-            # return HttpResponse("Your bid should be greater than the current highest bid")
-            messages.error(request, "Your bid should be greater than the current highest bid")
-            return item(request, thing_id, message="Your bid should be greater than the current highest bid!!!")
+            return item(request, thing_id, message=f"Your bid should be greater than the current highest bid which is ${curr_price}!!!")
 
 
 @login_required
@@ -182,4 +193,27 @@ def watchlist(request):
     return render(request, "auctions/index.html", {
         "items": user.watchlist.all(),
         "watchlist": True
+    })
+
+
+def close(request):
+    if request.method == "POST":
+        item_id = request.POST['listing']
+        thing = Listing.objects.get(id=item_id)
+        thing.open = False
+        thing.save()
+        return item(request, item_id)
+
+
+def categories(request):
+    choices = ['Fashion', 'Toy', 'Electronics', 'Home', 'Travel', 'other']
+    return render(request, "auctions/categories.html", {
+        "choices": choices
+    })
+
+
+def filter_category(request, choice):
+    return render(request, "auctions/index.html", {
+        "items": Listing.objects.filter(category=choice),
+        "watchlist": False
     })

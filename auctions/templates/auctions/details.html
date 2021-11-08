@@ -16,6 +16,9 @@
         </form>
     {% endif %}
     <br><br>
+    {% if winner %}
+        <h3>Congratulations {{user.username}}, You are the winner!!!</h3>
+    {% endif %}
     <div id="item-image-div">
         <img src="{{ item.image_url }}" alt="{{item.title}}">
     </div>
@@ -28,18 +31,29 @@
     <br>
         <h5>highest bidder: {{highest_bid.user_id}} &emsp;&emsp;Price: ${{highest_bid.price}}</h5>
         <p>{{bids.count }} bids so far.</p>
-    <form action="{% url 'bid' %}" method="POST">
-        {% csrf_token %}
-        {% if message %}
-        <div class="message"><strong>{{ message }}</strong></div>
+    {% if item.open %}
+        {% if owner %}
+            <form action="{% url 'close' %}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="listing" value="{{item.id}}">
+                <input type="submit" class="button-mid" value="Close Auction">
+            </form>
         {% endif %}
-        <input type="number" id="add-bid" placeholder="Bid" name="price">
-        <span>Please enter bid higher than current highest bid.</span>
-        <input type="hidden" name="listing" value="{{item.id}}">
-        <input type="hidden" name="curr_price" value="{{highest_bid.price}}">
-        <br>
-        <input type="submit" value="Place Bid" class="button-mid">
-    </form>
+        <form action="{% url 'bid' %}" method="POST">
+            {% csrf_token %}
+            {% if message %}
+            <div class="message"><strong>{{ message }}</strong></div>
+            {% endif %}
+            <input type="number" id="add-bid" placeholder="Bid" name="price">
+            <span>Please enter bid higher than current highest bid.</span>
+            <input type="hidden" name="listing" value="{{item.id}}">
+            <input type="hidden" name="curr_price" value="{{highest_bid.price}}">
+            <br>
+            <input type="submit" value="Place Bid" class="button-mid">
+        </form>
+    {% else %}
+        <h3>Sorry, the auction is closed!</h3>
+    {% endif %}
     <br>
     <h5>Details</h5>
     <ul>
