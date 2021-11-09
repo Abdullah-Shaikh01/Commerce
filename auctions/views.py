@@ -120,7 +120,7 @@ def item(request, item_id, message=None):
     watch_list = user.watchlist.all()
     watchlisted = item_details in watch_list
     if not highest_bid:
-        highest_bid = Bid(listing_id=item_details, user_id=user, price=item_details.base_price)
+        highest_bid = Bid(listing_id=item_details, user_id=item_details.owner, price=item_details.base_price)
 
     return render(request, "auctions/details.html", {
         "item": item_details,
