@@ -92,23 +92,15 @@ class ListingForm(forms.ModelForm):
 @login_required
 def listing(request):
     if request.method == "POST":
-
         # Take in the data the user submitted and save it as form
         form = ListingForm(request.POST)
         owner = User.objects.get(id=request.user.id)
-        # Check if form data is valid (server-side)
-        if form.is_valid():
-            listing_item = form.save(commit=False)
-            listing_item.owner = owner
-            listing_item.save()
-            return render(request, "auctions/details.html", {
-                "item": listing_item
-            })
-        else:
-            # If the form is invalid, re-render the page with existing information.
-            return render(request, "auctions/create.html", {
-                "form": ListingForm()
-            })
+        listing_item = form.save(commit=False)
+        listing_item.owner = owner
+        listing_item.save()
+        return render(request, "auctions/details.html", {
+            "item": listing_item
+        })
     return render(request, "auctions/create.html", {
         "form": ListingForm()
     })
@@ -121,6 +113,7 @@ def item(request, item_id, message=None):
     owner = item_details.owner == user
     bids = item_details.bid.all()
     highest_bid = bids.last()
+    winner = False
     if not item_details.open:
         winner = user == highest_bid.user_id
     comments = item_details.item_comment.all()
@@ -154,7 +147,8 @@ def bid(request):
             curr_bid.save()
             return item(request, thing_id)
         else:
-            return item(request, thing_id, message=f"Your bid should be greater than the current highest bid which is ${curr_price}!!!")
+            msg = f"Your bid should be greater than the current highest bid which is ${curr_price}!!!"
+            return item(request, thing_id, message=msg)
 
 
 @login_required
