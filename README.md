@@ -1,7 +1,8 @@
 # Commerce
 This is an E-bay like E-commerce auction site created using HTML, CSS, JavaScript and Django  
 
-## Getting Started  
+## Getting Started
+Assuming you have installed django
 1. Download the distribution code from https://cdn.cs50.net/web/2020/spring/projects/2/commerce.zip and unzip it.  
 2. In your terminal, cd into the commerce directory.  
 3. Run python manage.py makemigrations auctions to make migrations for the auctions app.  
